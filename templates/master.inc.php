@@ -44,7 +44,8 @@
       </nav>
 
       <?php
-        include "templates/home.inc.php";
+        // include "templates/home.inc.php";
+        include "templates/about.inc.php";
         content();
       ?>
 
