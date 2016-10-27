@@ -1,5 +1,4 @@
   <?php
 
-  include "templates/master.inc.php";
-
-  ?>
+  error_reporting(E_ALL);
+  require "routes.php";

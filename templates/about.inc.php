@@ -1,4 +1,5 @@
 <?php
+include "templates/master.inc.php";
 function content(){
 
   ?>
