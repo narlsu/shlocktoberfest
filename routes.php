@@ -1,83 +1,102 @@
-  <?php
-
-   $page = ! isset($_GET['page']) ? "home" : $_GET['page'];
-
-
+<?php
   
+  $page = ! isset($_GET['page']) ? "home" : $_GET['page'];
+
   switch ($page) {
+    
     case 'home':
-      if (isset($_SESSION['moviesuggest'])) {
-        $moviesuggest = ($_SESSION['moviesuggest']);
-      } else {
-        $moviesuggest = [
-          'title' => "",
-          'email' => "",
-          'checkbox' => "",
-          'errors' => [
-            'title' => "",
-            'email' => "",
-            'checkbox' => ""
-          ]
-        ];
-      }
-      include "templates/home.inc.php";
-      break;
 
+      if(isset($_SESSION['moviesuggest'])){
+        $moviesuggest = $_SESSION['moviesuggest'];
+      }else {
+        $moviesuggest= [
+                'title' => "",
+                'email' => "",
+                'checkbox' => "",
+                'errors' =>[
+                    'title' => "",
+                    'email' => "",
+                    'checkbox' => ""
+                  ]
+          ];
+      }     
+      $view = new HomeView(compact('moviesuggest'));
+      $view->render();
+      break;
+    
     case 'about':
-      include "templates/about.inc.php";
-      break;
+      $view = new AboutView();
+      $view->render();
 
+      break;
+    
     case 'moviesuggest':
 
-     $_SESSION['moviesuggest']= null;
-     // moving form information into a moviesuggest variable
-     $moviesuggest = [
-        'errors'=>[]
-     ];
-     $expectedVariables =[ 'email', 'title' , 'checkbox'];
+      $_SESSION['moviesuggest']= null;
+      
+      //moving form information into a moviesuggest variable 
 
-     foreach ($expectedVariables as $variable) {
+      $moviesuggest = [
+                        'errors'=>[]
+                      ];
+      $expectedVariables =['title','email','checkbox'];
 
-      // creating errors for error field
+      foreach ($expectedVariables as $variable) {
 
+        // creating entries for error field
+        $moviesuggest['errors'][$variable]="";
 
-       $moviesuggest['errors'][$variable]="";
+        // move all $_POST values into MovieSuggest array
+        if(isset($_POST[$variable])){
+          $moviesuggest[$variable] = $_POST[$variable];
+        }else {
+          $moviesuggest[$variable]="";
+        }
+      }
 
-       // move all $_POST values into moviesuggest array
+      //form validation
 
-       if (isset($_POST[$variable])){
-        $moviesuggest[$variable] = $_POST[$variable];
-       } else {
-        $moviesuggest[$variable]="";
-       }
-     }
-     // form validation
+      $errors = false;
 
-     $errors = false;
+      if(strlen($moviesuggest['title']) === 0){
+        $moviesuggest['errors']['title']="Enter a title.";
+        $errors = true;
+      }
 
-     if(strlen($moviesuggest['title']) === 0) {
-      $moviesuggest['errors']['title']="Enter a title.";
-      $errors = true;
-     }
+      if (! filter_var($moviesuggest['email'], FILTER_VALIDATE_EMAIL)) {
+        $moviesuggest['errors']['email']="Enter a valid email.";
+        $errors = true;
+      }
 
-     if (! filter_var($moviesuggest['email'], FILTER_VALIDATE_EMAIL)) {
-      $moviesuggest['errors']['email']="Enter a valid email";
-      $errors = true;
-     }
-     if ( $errors === true) {
-      echo "form has to be validated !";
-     
-      $_SESSION['moviesuggestError'] = true;
-      $_SESSION['moviesuggest']=$moviesuggest;
-      header("location:./");
-     } 
-     
-      echo "Successfully suggested a movie!";
+      if($errors === true){
+        
+        $_SESSION['moviesuggestError'] = true;
+        $_SESSION['moviesuggest']= $moviesuggest;
+        header("location:./");
+      } 
+      $view = new SuggesterEmailView(compact('moviesuggest'));
+      $view->render();
 
-     
+      header("Location:./?page=moviesuggestsuccess");
+      break;
+
+    case 'moviesuggestsuccess':
+     $view = new MovieSuggestSuccessView();
+     $view->render();
      break;
 
     default:
-      echo "Error 404";
+      echo "Error 404 ! Page not found !";
       break;
   }
+
+
+
+
+
+
+
+
+
+
+
